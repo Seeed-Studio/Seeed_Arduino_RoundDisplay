@@ -14,7 +14,9 @@
 #define CHSC6X_READ_POINT_LEN 5
 #define TOUCH_INT D7
 
+#ifndef XIAO_BL
 #define XIAO_BL D6
+#endif
 #define XIAO_DC D3
 #define XIAO_CS D1
 
@@ -62,8 +64,10 @@ void xiao_disp_flush( lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *co
 
 void xiao_disp_init(void)
 {
-	pinMode(XIAO_BL, OUTPUT); //Turn on screen backlight
+#if XIAO_BL > 0
+    pinMode(XIAO_BL, OUTPUT); //Turn on screen backlight
     digitalWrite(XIAO_BL, HIGH);
+#endif
 
 #if defined(USE_TFT_ESPI_LIBRARY)
     tft.begin();
@@ -93,7 +97,6 @@ void lv_xiao_disp_init(void)
     disp_drv.draw_buf = &draw_buf;
     lv_disp_drv_register( &disp_drv );
 }
-
 
 
 
