@@ -6,7 +6,6 @@ An Arduino graphics library based on LVGL, specifically designed for Round Displ
 ## Depends
 
     lvgl, lv_examples, TFT_eSPI, GFX Library for Arduino, I2C BM8563 RTC, SD, AnimatedGIF
-    > If the example requires it, please install them from the Arduino Library Manager. 
 
 ## Usage
 
@@ -15,6 +14,8 @@ An Arduino graphics library based on LVGL, specifically designed for Round Displ
     3.Uncomment a library for display driver
 
 ## Note
+
+Please install the dependencies from the Arduino Library Manager. 
 
 If you want to use the TFT_eSPI library for display driving, you must comment out the line `#include <User_Setup.h>` and uncomment the line  `#include <User_Setups/Setup66_Seeed_XIAO_RoundDisplay.h> ` in the "User_Setup_Select.h" file.
 
