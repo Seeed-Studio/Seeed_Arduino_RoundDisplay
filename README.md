@@ -3,6 +3,11 @@
 
 An Arduino graphics library based on LVGL, specifically designed for Round Display for XIAO.
 
+## Depends
+
+    lvgl, lv_examples, TFT_eSPI, GFX Library for Arduino, I2C BM8563 RTC, SD, AnimatedGIF
+    > If the example requires it, please install them from the Arduino Library Manager. 
+
 ## Usage
 
     1.Git clone this resp to your Arduino IDE's libraries directory.
