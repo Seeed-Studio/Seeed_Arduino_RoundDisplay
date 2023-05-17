@@ -10,8 +10,9 @@ An Arduino graphics library based on LVGL, specifically designed for Round Displ
 ## Usage
 
     1.Git clone this resp to your Arduino IDE's libraries directory.
-    2.Run the demo "HardTest" on examples directory.
-    3.Uncomment a library for display driver
+    2.Install all the dependencies from the Arduino Library Manager.
+    3.Uncomment a library for display driver.
+    4.Run the demo "HardTest" on examples directory.
 
 ## Note
 
