@@ -1192,7 +1192,7 @@ void chsc6x_ota_upgrade_tp_fw(struct ts_fw_infos *pfw_infos, uint8_t* p_fw_upd, 
 void setup() {
   Serial.begin(115200);
   while (!Serial) { delay(100); }
-  Log.begin(LOG_LEVEL_VERBOSE, &Serial);
+  // Log.begin(LOG_LEVEL_VERBOSE, &Serial);
 
   pinMode(TOUCH_INT, INPUT_PULLUP);
   pinMode(D0, OUTPUT);
