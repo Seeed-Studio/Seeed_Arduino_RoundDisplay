@@ -47,19 +47,37 @@ Arduino_GFX *gfx = new Arduino_GC9A01(bus, -1, screen_rotation, true);
 #error "Please define a graphics library for display."
 #endif
 
+#if LVGL_VERSION_MAJOR == 9
+void xiao_disp_flush( lv_display_t *disp, const lv_area_t *area, uint8_t *px_map )
+#elif LVGL_VERSION_MAJOR == 8
 void xiao_disp_flush( lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p )
+#else
+#error "Not support LVGL version"
+#endif
 {
     uint32_t w = ( area->x2 - area->x1 + 1 );
     uint32_t h = ( area->y2 - area->y1 + 1 );
+
+#if LVGL_VERSION_MAJOR == 9
+    uint16_t *px_buf = ( uint16_t * )px_map;
+#elif LVGL_VERSION_MAJOR == 8
+    uint16_t *px_buf = ( uint16_t * )&color_p->full;
+#endif
+
 #if defined(USE_TFT_ESPI_LIBRARY)
     tft.startWrite();
     tft.setAddrWindow( area->x1, area->y1, w, h );
-    tft.pushColors( ( uint16_t * )&color_p->full, w * h, true );
+    tft.pushColors( px_buf, w * h, true );
     tft.endWrite();
 #elif defined(USE_ARDUINO_GFX_LIBRARY)
-    gfx->draw16bitRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
+    gfx->draw16bitRGBBitmap(area->x1, area->y1, px_buf, w, h);
 #endif
-    lv_disp_flush_ready( disp );
+
+#if LVGL_VERSION_MAJOR == 9
+    lv_display_flush_ready(disp);
+#elif LVGL_VERSION_MAJOR == 8
+    lv_disp_flush_ready(disp);
+#endif
 }
 
 void xiao_disp_init(void)
@@ -83,11 +101,16 @@ void lv_xiao_disp_init(void)
 {
     xiao_disp_init();
 
+#if LVGL_VERSION_MAJOR == 9
+    static uint8_t draw_buf[ SCREEN_WIDTH * LVGL_BUFF_SIZE * LV_COLOR_DEPTH / 8 ];
+    lv_display_t * disp = lv_display_create(SCREEN_WIDTH, SCREEN_HEIGHT);
+    lv_display_set_flush_cb(disp, xiao_disp_flush);
+    lv_display_set_buffers(disp, (void*)draw_buf, NULL, sizeof(draw_buf), LV_DISPLAY_RENDER_MODE_PARTIAL);
+#elif LVGL_VERSION_MAJOR == 8
     /*Initialize the display buffer*/
     static lv_disp_draw_buf_t draw_buf;
     static lv_color_t buf[ SCREEN_WIDTH * LVGL_BUFF_SIZE ];
     lv_disp_draw_buf_init( &draw_buf, buf, NULL, SCREEN_WIDTH * LVGL_BUFF_SIZE );
-
     /*Initialize the display driver for lvgl*/
     static lv_disp_drv_t disp_drv;
     lv_disp_drv_init( &disp_drv );
@@ -96,6 +119,7 @@ void lv_xiao_disp_init(void)
     disp_drv.flush_cb = xiao_disp_flush;
     disp_drv.draw_buf = &draw_buf;
     lv_disp_drv_register( &disp_drv );
+#endif
 }
 
 
@@ -105,7 +129,7 @@ void lv_xiao_disp_init(void)
 bool chsc6x_is_pressed(void)
 {
     if(digitalRead(TOUCH_INT) != LOW) {
-        delay(3);
+        delay(1);
         if(digitalRead(TOUCH_INT) != LOW)
         return false;
     }
@@ -138,7 +162,11 @@ void chsc6x_get_xy(lv_coord_t * x, lv_coord_t * y)
     }
 }
 
+#if LVGL_VERSION_MAJOR == 9
+void chsc6x_read( lv_indev_t * indev, lv_indev_data_t * data )
+#elif LVGL_VERSION_MAJOR == 8
 void chsc6x_read( lv_indev_drv_t * indev_driver, lv_indev_data_t * data )
+#endif
 {
     lv_coord_t touchX, touchY;
     if( !chsc6x_is_pressed() )
@@ -158,9 +186,15 @@ void lv_xiao_touch_init(void)
     pinMode(TOUCH_INT, INPUT_PULLUP);
     Wire.begin(); // Turn on the IIC bus for touch driver
     /*Initialize the touch driver for lvgl*/
+#if LVGL_VERSION_MAJOR == 9
+    lv_indev_t * indev = lv_indev_create();
+    lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
+    lv_indev_set_read_cb(indev, chsc6x_read);
+#elif LVGL_VERSION_MAJOR == 8
     static lv_indev_drv_t indev_drv;
     lv_indev_drv_init(&indev_drv);
     indev_drv.type = LV_INDEV_TYPE_POINTER;
     indev_drv.read_cb = chsc6x_read;
     lv_indev_drv_register(&indev_drv);
+#endif
 }
