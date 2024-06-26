@@ -102,7 +102,7 @@ void lv_xiao_disp_init(void)
     xiao_disp_init();
 
 #if LVGL_VERSION_MAJOR == 9
-    static uint8_t draw_buf[ SCREEN_WIDTH * LVGL_BUFF_SIZE * LV_COLOR_DEPTH / 8 ];
+    static uint32_t draw_buf[ SCREEN_WIDTH * LVGL_BUFF_SIZE * LV_COLOR_DEPTH / 8 / 4 ];
     lv_display_t * disp = lv_display_create(SCREEN_WIDTH, SCREEN_HEIGHT);
     lv_display_set_flush_cb(disp, xiao_disp_flush);
     lv_display_set_buffers(disp, (void*)draw_buf, NULL, sizeof(draw_buf), LV_DISPLAY_RENDER_MODE_PARTIAL);
