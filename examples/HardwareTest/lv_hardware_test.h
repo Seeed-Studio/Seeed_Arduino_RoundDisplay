@@ -49,7 +49,7 @@ void rtc_clock_cb(lv_timer_t * timer) {
 static void event_handler(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t * obj = lv_event_get_target(e);
+    lv_obj_t * obj = (lv_obj_t *)lv_event_get_target(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
         LV_LOG_USER("State: %s\n", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
     }
@@ -69,7 +69,7 @@ static void hardware_polled_cb(lv_timer_t * timer) {
 
 static void slider_event_cb(lv_event_t * e)
 {
-    lv_obj_t * slider = lv_event_get_target(e);
+    lv_obj_t * slider = (lv_obj_t *)lv_event_get_target(e);
     lv_label_set_text_fmt(slider_label, "%"LV_PRId32, lv_slider_get_value(slider));
     lv_obj_align_to(slider_label, slider, LV_ALIGN_OUT_TOP_MID, 0, -15);
 }
