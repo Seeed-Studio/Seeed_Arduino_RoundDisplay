@@ -1,0 +1,102 @@
+name: Run Ci Arduino
+
+on:
+  push:
+  pull_request:
+  repository_dispatch:
+    types: [trigger-workflow]
+
+jobs:
+  ci-arduino:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout script repository
+        uses: actions/checkout@v4
+        with:
+            repository: Seeed-Studio/ci-arduino
+            path: ci
+
+
+      - name: Setup arduino cli
+        uses: arduino/setup-arduino-cli@v2.0.0
+
+      - name: Create a depend.list file
+        run: |
+          # eg: echo "<repo>" >> depend.list
+          # echo "lvgl/lvgl" >> depend.list
+          # echo "lvgl/lv_demos" >> depend.list
+          echo "Bodmer/TFT_eSPI" >> depend.list
+          echo "moononournation/Arduino_GFX" >> depend.list
+          echo "tanakamasayuki/I2C_BM8563" >> depend.list
+          echo "arduino-libraries/SD" >> depend.list
+          echo "bitbank2/AnimatedGIF" >> depend.list
+
+
+
+      - name: Create a ignore.list file
+        run: |
+          # eg: echo "<path>,<fqbn>" >> ignore.list
+
+          # seeed_XIAO_m0 RAM and flash is too small
+          echo "HardwareTest,Seeeduino:samd:seeed_XIAO_m0" >> ignore.list   
+          echo "LvglBenchmark,Seeeduino:samd:seeed_XIAO_m0" >> ignore.list  
+          echo "TFT_Clock,Seeeduino:samd:seeed_XIAO_m0" >> ignore.list
+
+          # XIAO_RA4M1 RAM and flash is too small
+          echo "HardwareTest,Seeeduino:renesas_uno:XIAO_RA4M1" >> ignore.list
+          echo "LvglBenchmark,Seeeduino:renesas_uno:XIAO_RA4M1" >> ignore.list
+          echo "TFT_eSPI_GifPlayer,Seeeduino:renesas_uno:XIAO_RA4M1" >> ignore.list
+
+          # TFT_eSPI not support XIAO_ESP32C6
+          echo "HardwareTest,esp32:esp32:XIAO_ESP32C6" >> ignore.list
+          echo "LvglBenchmark,esp32:esp32:XIAO_ESP32C6" >> ignore.list
+          echo "TFT_Clock,esp32:esp32:XIAO_ESP32C6" >> ignore.list
+          echo "TFT_eSPI_Clock,esp32:esp32:XIAO_ESP32C6" >> ignore.list
+          echo "TFT_eSPI_GifPlayer,esp32:esp32:XIAO_ESP32C6" >> ignore.list
+
+          # AnimatedGIF not support XIAO_RP2040
+          echo "TFT_eSPI_GifPlayer,rp2040:rp2040:seeed_xiao_rp2350" >> ignore.list
+
+      - name: Install lvgl
+        run: |
+          mkdir -p /home/runner/Arduino/libraries
+          git clone --depth 1 https://github.com/lvgl/lvgl /home/runner/Arduino/libraries/lvgl
+          cp -r /home/runner/Arduino/libraries/lvgl/lv_conf_template.h /home/runner/Arduino/libraries/lv_conf.h
+          sed -i 's/#if 0/#if 1/' /home/runner/Arduino/libraries/lv_conf.h
+          sed -i 's/#define LV_USE_DEMO_WIDGETS 0/#define LV_USE_DEMO_WIDGETS 1/' /home/runner/Arduino/libraries/lv_conf.h
+          sed -i 's/#define LV_USE_DEMO_BENCHMARK 0/#define LV_USE_DEMO_BENCHMARK 1/' /home/runner/Arduino/libraries/lv_conf.h
+          sed -i 's/#define LV_FONT_MONTSERRAT_26 0/#define LV_FONT_MONTSERRAT_26 1/' /home/runner/Arduino/libraries/lv_conf.h
+          sed -i 's/#define LV_FONT_MONTSERRAT_14 0/#define LV_FONT_MONTSERRAT_14 1/' /home/runner/Arduino/libraries/lv_conf.h
+          sed -i 's/#define LV_FONT_MONTSERRAT_20 0/#define LV_FONT_MONTSERRAT_20 1/' /home/runner/Arduino/libraries/lv_conf.h
+          sed -i 's/#define LV_FONT_MONTSERRAT_24 0/#define LV_FONT_MONTSERRAT_24 1/' /home/runner/Arduino/libraries/lv_conf.h
+
+          ln -s /home/runner/Arduino/libraries/lvgl/demos /home/runner/Arduino/libraries/lvgl/src/demos
+
+
+          
+          # git clone --depth 1 https://github.com/lvgl/lv_demos.git /home/runner/Arduino/libraries/lv_demos
+          # cp -r /home/runner/Arduino/libraries/lv_demos/lv_demo_conf_template.h /home/runner/Arduino/libraries/lv_demo_conf.h
+          # sed -i 's/#if 0/#if 1/' /home/runner/Arduino/libraries/lv_demo_conf.h
+          
+
+
+      - name: Build sketch
+        run: |
+          ./ci/tools/compile.sh
+
+      - name: Build result
+        run: |
+            cat build.log
+            if [ ${{ github.event_name }} == 'pull_request' ] && [ -f compile.failed ]; then
+                exit 1
+            fi
+
+      - name: Generate issue
+        if: ${{ github.event_name != 'pull_request' }}
+        run: ./ci/tools/issue.sh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

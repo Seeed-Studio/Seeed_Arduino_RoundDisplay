@@ -1,7 +1,9 @@
 
 #include <SD.h>
 #include "I2C_BM8563.h"
+#include <lvgl.h>
 
+#include <lvgl_private.h>
 #define NUM_ADC_SAMPLE 20
 #define RP2040_VREF 3300 // The actual voltage on 3V3 pin. (unit: mV)
 static lv_obj_t *slider_label;

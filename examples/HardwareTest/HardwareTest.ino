@@ -13,7 +13,10 @@ void setup()
     Serial.println( "XIAO round screen - LVGL_Arduino" );
 
     lv_init();
-
+    #if LVGL_VERSION_MAJOR == 9
+    lv_tick_set_cb(millis);
+    #endif
+    
     lv_xiao_disp_init();
     lv_xiao_touch_init();
 

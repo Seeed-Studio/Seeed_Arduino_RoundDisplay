@@ -1,6 +1,5 @@
 #include <lvgl.h>
-#include <lv_demo.h>
-
+#include <demos/lv_demos.h>
 // uncomment a library for display driver
 #define USE_TFT_ESPI_LIBRARY
 // #define USE_ARDUINO_GFX_LIBRARY
@@ -13,6 +12,10 @@ void setup()
     Serial.println( "XIAO round screen - LVGL_Arduino" );
 
     lv_init();
+
+    #if LVGL_VERSION_MAJOR == 9
+    lv_tick_set_cb(millis);
+    #endif
 
     lv_xiao_disp_init();
     lv_xiao_touch_init();
