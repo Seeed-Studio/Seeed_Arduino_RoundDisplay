@@ -1,7 +1,7 @@
 # Seeed Studio Round Display for XIAO
 ## Introduction 
 
-An Arduino graphics library based on LVGL, specifically designed for [Seeed Studio Round Display for XIAO](https://www.seeedstudio.com/Seeed-Studio-Round-Display-for-XIAO-p-5638.html). Wiki for this product can be found [here](https://wiki.seeedstudio.com/using_lvgl_and_tft_on_round_display/).
+An Arduino graphics library based on LVGL, specifically designed for [Seeed Studio Round Display for XIAO](https://www.seeedstudio.com/Seeed-Studio-Round-Display-for-XIAO-p-5638.html). Wiki for this product can be found [here](https://wiki.seeedstudio.com/using_lvgl_and_tft_on_round_display/).The dependent TFT_eSPI library is [here](https://github.com/Seeed-Projects/SeeedStudio_TFT_eSPI).
 
 ## Depends
 
